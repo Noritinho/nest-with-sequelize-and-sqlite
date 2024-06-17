@@ -16,18 +16,35 @@ export class UsersService {
     return this.userModel.findAll();
   }
 
-  findOne(id: string): Promise<User | null> {
-    return this.userModel.findOne({
-      where: {
-        id,
-      },
-    });
+  findById(id: number): Promise<User | null> {
+    const user = this.userModel.findOne({ where: { id } });
+    return user;
   }
 
-  async remove(id: string): Promise<void> {
-    const user = await this.findOne(id);
-    if (user) {
-      await user.destroy();
-    }
+  findByName(name: string): Promise<User[]> {
+    const user = this.userModel.findAll({ where: { name } });
+    return user;
+  }
+
+  findByEmail(email: string): Promise<User | null> {
+    const user = this.userModel.findOne({ where: { email } });
+    return user;
+  }
+
+  updateById(id: number, updateUserDto: CreateUserDto) {
+    const user = this.userModel.update(
+      {
+        name: updateUserDto.name,
+        email: updateUserDto.email,
+        password: updateUserDto.password,
+      },
+      { where: { id } },
+    );
+
+    return user;
+  }
+
+  removeById(id: number) {
+    this.userModel.destroy({ where: { id } });
   }
 }
