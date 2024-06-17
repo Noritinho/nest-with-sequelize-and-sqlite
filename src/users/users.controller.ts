@@ -21,35 +21,35 @@ export class UsersController {
   }
 
   @Get()
-  findAll() {
-    return this.usersService.findAll();
+  findAllUsers() {
+    return this.usersService.findAllUsers();
   }
 
   @Get('/id/:id')
-  findById(@Param('id') params: number) {
-    return this.usersService.findById(params);
+  findUSerById(@Param('id') params: number) {
+    return this.usersService.findUSerById(params);
   }
 
   @Get('/name/:name')
-  findByName(@Param('name') params: string) {
-    return this.usersService.findByName(params);
+  findUsersByName(@Param('name') params: string) {
+    return this.usersService.findUsersByName(params);
   }
 
   @Get('/email/:email')
-  findByEmail(@Param('email') params: string) {
-    return this.usersService.findByEmail(params);
+  findUserByEmail(@Param('email') params: string) {
+    return this.usersService.findUserByEmail(params);
   }
 
   @Put(':id')
-  async updateById(
+  updateUserById(
     @Param('id') params: number,
     @Body() createUserDto: CreateUserDto,
   ) {
-    return this.usersService.updateById(params, createUserDto);
+    return this.usersService.updateUserById(params, createUserDto);
   }
 
   @Delete(':id')
-  removeById(@Param('id') params: number) {
-    return this.usersService.removeById(params);
+  deleteUserById(@Param('id') params: number) {
+    return this.usersService.deleteUserById(params);
   }
 }

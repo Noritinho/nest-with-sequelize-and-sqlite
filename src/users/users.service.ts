@@ -1,50 +1,48 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
-import { User } from './user.model';
+import { User } from './models/user.model';
 import { CreateUserDto } from './dto/create-user.dto';
 
 @Injectable()
 export class UsersService {
   constructor(@InjectModel(User) private userModel: typeof User) {}
 
-  async create(createUserDto: CreateUserDto) {
-    const { name, email, password } = createUserDto;
-    this.userModel.create({ name, email, password });
+  create(user: CreateUserDto): Promise<User> {
+    return this.userModel.create({
+      name: user.name,
+      email: user.email,
+      password: user.password,
+    });
   }
 
-  async findAll(): Promise<User[]> {
+  findAllUsers(): Promise<User[]> {
     return this.userModel.findAll();
   }
 
-  findById(id: number): Promise<User | null> {
-    const user = this.userModel.findOne({ where: { id } });
-    return user;
+  findUSerById(id: number): Promise<User | null> {
+    return this.userModel.findOne({ where: { id } });
   }
 
-  findByName(name: string): Promise<User[]> {
-    const user = this.userModel.findAll({ where: { name } });
-    return user;
+  findUsersByName(name: string): Promise<User[]> {
+    return this.userModel.findAll({ where: { name } });
   }
 
-  findByEmail(email: string): Promise<User | null> {
-    const user = this.userModel.findOne({ where: { email } });
-    return user;
+  findUserByEmail(email: string): Promise<User | null> {
+    return this.userModel.findOne({ where: { email } });
   }
 
-  updateById(id: number, updateUserDto: CreateUserDto) {
-    const user = this.userModel.update(
+  updateUserById(id: number, user: CreateUserDto) {
+    return this.userModel.update(
       {
-        name: updateUserDto.name,
-        email: updateUserDto.email,
-        password: updateUserDto.password,
+        name: user.name,
+        email: user.email,
+        password: user.password,
       },
       { where: { id } },
     );
-
-    return user;
   }
 
-  removeById(id: number) {
-    this.userModel.destroy({ where: { id } });
+  deleteUserById(id: number): Promise<number> {
+    return this.userModel.destroy({ where: { id } });
   }
 }
