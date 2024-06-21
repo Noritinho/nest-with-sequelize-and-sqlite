@@ -6,10 +6,14 @@ import {
   Delete,
   Param,
   Body,
+  HttpException,
+  HttpStatus,
+  HttpCode,
 } from '@nestjs/common';
 
 import { CreateUserDto } from './dto/create-user.dto';
 import { UsersService } from './users.service';
+import { error } from 'console';
 
 @Controller('users')
 export class UsersController {
@@ -17,39 +21,95 @@ export class UsersController {
 
   @Post()
   async create(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
+    return await this.usersService.create(createUserDto);
   }
 
   @Get()
-  findAllUsers() {
-    return this.usersService.findAllUsers();
+  @HttpCode(200)
+  async findAllUsers() {
+    try {
+      return await this.usersService.findAllUsers();
+    } catch (e) {
+      throw new HttpException(
+        {
+          status: HttpStatus.FORBIDDEN,
+          error: 'Unable to list users',
+        },
+        HttpStatus.FORBIDDEN,
+        { cause: error },
+      );
+    }
   }
 
   @Get('/id/:id')
-  findUSerById(@Param('id') params: number) {
-    return this.usersService.findUSerById(params);
+  @HttpCode(200)
+  async findUSerById(@Param('id') params: number) {
+    const user = await this.usersService.findUSerById(params);
+
+    if (!user) {
+      throw new HttpException('User not found', 404);
+    }
+
+    return user;
   }
 
   @Get('/name/:name')
-  findUsersByName(@Param('name') params: string) {
-    return this.usersService.findUsersByName(params);
+  @HttpCode(200)
+  async findUsersByName(@Param('name') params: string) {
+    const user = await this.usersService.findUsersByName(params);
+    const checkIfUserExists = await this.usersService.findUserByName(params);
+
+    if (!checkIfUserExists) {
+      throw new HttpException('User not found', 404);
+    }
+
+    return user;
   }
 
   @Get('/email/:email')
-  findUserByEmail(@Param('email') params: string) {
-    return this.usersService.findUserByEmail(params);
+  @HttpCode(200)
+  async findUserByEmail(@Param('email') params: string) {
+    const user = await this.usersService.findUserByEmail(params);
+
+    if (!user) {
+      throw new HttpException('User not found', 404);
+    }
+
+    return user;
   }
 
-  @Put(':id')
-  updateUserById(
+  @Put('/id/:id')
+  @HttpCode(201)
+  async updateUserById(
     @Param('id') params: number,
     @Body() createUserDto: CreateUserDto,
   ) {
-    return this.usersService.updateUserById(params, createUserDto);
+    const user = await this.usersService.updateUserById(params, createUserDto);
+
+    const checkIfUserExists = await this.findUSerById(params);
+    const checkIfEmailExists = await this.findUserByEmail(createUserDto.email);
+
+    if (!checkIfUserExists) {
+      throw new HttpException('User not found', 404);
+    }
+
+    if (checkIfEmailExists) {
+      throw new HttpException('Email already in use', 409);
+    }
+    return user;
   }
 
-  @Delete(':id')
-  deleteUserById(@Param('id') params: number) {
-    return this.usersService.deleteUserById(params);
+  @Delete('/id/:id')
+  @HttpCode(204)
+  async deleteUserById(@Param('id') params: number) {
+    const checkIfUserExists = await this.findUSerById(params);
+
+    if (!checkIfUserExists) {
+      throw new HttpException('User not found', 404);
+    }
+
+    const user = await this.usersService.deleteUserById(params);
+
+    return user;
   }
 }

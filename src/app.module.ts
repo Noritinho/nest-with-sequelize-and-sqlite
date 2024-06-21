@@ -1,16 +1,15 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { UsersModule } from './users/users.module';
+import { dataBaseConfig } from './database/database.config';
+import { LoggerMiddleware } from './common/middleware/logger.middleware';
+import { UsersController } from './users/users.controller';
 
 @Module({
-  imports: [
-    SequelizeModule.forRoot({
-      dialect: 'sqlite',
-      storage: 'src/database/sqlite/database.sqlite3',
-      autoLoadModels: true,
-      synchronize: false,
-    }),
-    UsersModule,
-  ],
+  imports: [SequelizeModule.forRoot(dataBaseConfig), UsersModule],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(LoggerMiddleware).forRoutes(UsersController);
+  }
+}

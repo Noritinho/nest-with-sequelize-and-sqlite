@@ -23,6 +23,10 @@ export class UsersService {
     return this.userModel.findOne({ where: { id } });
   }
 
+  findUserByName(name: string): Promise<User | null> {
+    return this.userModel.findOne({ where: { name } });
+  }
+
   findUsersByName(name: string): Promise<User[]> {
     return this.userModel.findAll({ where: { name } });
   }
