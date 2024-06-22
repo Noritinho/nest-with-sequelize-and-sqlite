@@ -9,17 +9,21 @@ import {
   HttpException,
   HttpStatus,
   HttpCode,
+  UsePipes,
 } from '@nestjs/common';
 
-import { CreateUserDto } from './dto/create-user.dto';
 import { UsersService } from './users.service';
 import { error } from 'console';
+import { ZodValidationPipe } from 'src/pipes/validation-pipe';
+import { CreateUserDto, createUserSchema } from './dto/user.dto';
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post()
+  @HttpCode(201)
+  @UsePipes(new ZodValidationPipe(createUserSchema))
   async create(@Body() createUserDto: CreateUserDto) {
     return await this.usersService.create(createUserDto);
   }
